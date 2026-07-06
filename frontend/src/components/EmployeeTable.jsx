@@ -13,7 +13,11 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-function EmployeeTable({ employees, onEdit, onDelete }) {
+function EmployeeTable({
+  employees = [],
+  onEdit,
+  onDelete,
+}) {
   return (
     <TableContainer component={Paper} elevation={3}>
       <Table>
@@ -63,14 +67,14 @@ function EmployeeTable({ employees, onEdit, onDelete }) {
 
         <TableBody>
 
-          {employees.length === 0 ? (
+          {(employees ?? []).length === 0 ? (
             <TableRow>
               <TableCell colSpan={9} align="center">
                 No Employees Found
               </TableCell>
             </TableRow>
           ) : (
-            employees.map((employee) => (
+            (employees ?? []).map((employee) => (
               <TableRow key={employee.id} hover>
 
                 <TableCell>{employee.employeeId}</TableCell>

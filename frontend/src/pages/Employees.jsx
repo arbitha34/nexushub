@@ -56,10 +56,13 @@ function Employees() {
 
   const loadEmployees = async () => {
     try {
-      const response = await getAllEmployees();
-      setEmployees(response.data);
+      const data = await getAllEmployees();
+
+      setEmployees(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error(error);
+
+      setEmployees([]);
 
       setSnackbar({
         open: true,
@@ -90,10 +93,12 @@ function Employees() {
   };
 
   const handleChange = (e) => {
-    setEmployee({
-      ...employee,
+    console.log(e.target.name, e.target.value);
+
+    setEmployee((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSave = async () => {
@@ -109,7 +114,7 @@ function Employees() {
         status: employee.status.trim(),
       };
 
-      console.log(requestBody);
+      console.log("Sending Request:", requestBody);
 
       if (employee.id) {
         await updateEmployee(employee.id, requestBody);
@@ -131,12 +136,12 @@ function Employees() {
 
       handleClose();
       loadEmployees();
+
     } catch (error) {
+
       console.log(error.response);
       console.log(error.response?.data);
       console.log(error.response?.status);
-
-      console.error(error);
 
       setSnackbar({
         open: true,
@@ -174,173 +179,181 @@ function Employees() {
       });
     }
   };
+    return (
+      <Box sx={{ display: "flex" }}>
+        <Sidebar />
 
-  return (
-    <Box sx={{ display: "flex" }}>
-      <Sidebar />
+        <Box sx={{ flexGrow: 1 }}>
+          <Topbar />
 
-      <Box sx={{ flexGrow: 1 }}>
-        <Topbar />
-
-        <Box
-          sx={{
-            mt: 8,
-            p: 4,
-            backgroundColor: "#f5f5f5",
-            minHeight: "100vh",
-          }}
-        >
-          <Grid
-            container
-            justifyContent="space-between"
-            alignItems="center"
-            mb={3}
+          <Box
+            sx={{
+              mt: 8,
+              p: 4,
+              backgroundColor: "#f5f5f5",
+              minHeight: "100vh",
+            }}
           >
-            <Typography variant="h4" fontWeight="bold">
-              Employees
-            </Typography>
-
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleOpen}
+            <Grid
+              container
+              justifyContent="space-between"
+              alignItems="center"
+              mb={3}
             >
-              Add Employee
-            </Button>
-          </Grid>
+              <Typography variant="h4" fontWeight="bold">
+                Employees
+              </Typography>
 
-          <Paper sx={{ p: 2 }}>
-            <EmployeeTable
-              employees={employees}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          </Paper>
-
-          <Dialog
-            open={open}
-            onClose={handleClose}
-            fullWidth
-            maxWidth="md"
-          >
-            <DialogTitle>
-              {employee.id ? "Update Employee" : "Add Employee"}
-            </DialogTitle>
-
-            <DialogContent>
-              <Grid container spacing={2} sx={{ mt: 1 }}>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Employee ID"
-                    name="employeeId"
-                    value={employee.employeeId}
-                    onChange={handleChange}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Employee Name"
-                    name="name"
-                    value={employee.name}
-                    onChange={handleChange}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Email"
-                    name="email"
-                    value={employee.email}
-                    onChange={handleChange}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Phone"
-                    name="phone"
-                    value={employee.phone}
-                    onChange={handleChange}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Department"
-                    name="department"
-                    value={employee.department}
-                    onChange={handleChange}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Designation"
-                    name="designation"
-                    value={employee.designation}
-                    onChange={handleChange}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    label="Salary"
-                    name="salary"
-                    value={employee.salary}
-                    onChange={handleChange}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="Status"
-                    name="status"
-                    value={employee.status}
-                    onChange={handleChange}
-                  />
-                </Grid>
-              </Grid>
-            </DialogContent>
-
-            <DialogActions>
-              <Button color="error" onClick={handleClose}>
-                Cancel
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleOpen}
+              >
+                Add Employee
               </Button>
+            </Grid>
 
-              <Button variant="contained" onClick={handleSave}>
-                Save
-              </Button>
-            </DialogActions>
-          </Dialog>
+            <Paper sx={{ p: 2 }}>
+              <EmployeeTable
+                employees={employees}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            </Paper>
 
-          <Snackbar
-            open={snackbar.open}
-            autoHideDuration={3000}
-            onClose={() =>
-              setSnackbar({
-                ...snackbar,
-                open: false,
-              })
-            }
-          >
-            <Alert severity={snackbar.severity} variant="filled">
-              {snackbar.message}
-            </Alert>
-          </Snackbar>
+            <Dialog
+              open={open}
+              onClose={handleClose}
+              fullWidth
+              maxWidth="md"
+            >
+              <DialogTitle>
+                {employee.id ? "Update Employee" : "Add Employee"}
+              </DialogTitle>
+
+              <DialogContent>
+                <Grid container spacing={2} sx={{ mt: 1 }}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Employee ID"
+                      name="employeeId"
+                      value={employee.employeeId}
+                      onChange={handleChange}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Employee Name"
+                      name="name"
+                      value={employee.name}
+                      onChange={handleChange}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Email"
+                      name="email"
+                      value={employee.email}
+                      onChange={handleChange}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Phone"
+                      name="phone"
+                      value={employee.phone}
+                      onChange={handleChange}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Department"
+                      name="department"
+                      value={employee.department}
+                      onChange={handleChange}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Designation"
+                      name="designation"
+                      value={employee.designation}
+                      onChange={handleChange}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      label="Salary"
+                      name="salary"
+                      value={employee.salary}
+                      onChange={handleChange}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Status"
+                      name="status"
+                      value={employee.status}
+                      onChange={handleChange}
+                    />
+                  </Grid>
+                </Grid>
+              </DialogContent>
+
+              <DialogActions>
+                <Button
+                  color="error"
+                  onClick={handleClose}
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  variant="contained"
+                  onClick={handleSave}
+                >
+                  Save
+                </Button>
+              </DialogActions>
+            </Dialog>
+
+            <Snackbar
+              open={snackbar.open}
+              autoHideDuration={3000}
+              onClose={() =>
+                setSnackbar({
+                  ...snackbar,
+                  open: false,
+                })
+              }
+            >
+              <Alert
+                severity={snackbar.severity}
+                variant="filled"
+              >
+                {snackbar.message}
+              </Alert>
+            </Snackbar>
+          </Box>
         </Box>
       </Box>
-    </Box>
-  );
-}
+    );
+  }
 
-export default Employees;
+  export default Employees;
