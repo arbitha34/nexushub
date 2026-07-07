@@ -23,6 +23,10 @@ public class EmployeeController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EmployeeResponse createEmployee(@Valid @RequestBody EmployeeRequest employeeRequest) {
+
+        System.out.println("========== REQUEST RECEIVED ==========");
+        System.out.println(employeeRequest);
+
         return employeeService.createEmployee(employeeRequest);
     }
 

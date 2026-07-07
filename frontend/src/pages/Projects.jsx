@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -10,6 +10,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -18,98 +20,203 @@ import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import ProjectTable from "../components/ProjectTable";
 
+import {
+  getAllProjects,
+  addProject,
+  updateProject,
+  deleteProject,
+} from "../services/projectService";
+
 function Projects() {
-  const [projects, setProjects] = useState([
-    {
-      id: 1,
-      name: "NexusHub",
-      manager: "John Doe",
-      teamSize: 8,
-      deadline: "2026-08-30",
-      status: "In Progress",
-    },
-    {
-      id: 2,
-      name: "HR Portal",
-      manager: "Sarah",
-      teamSize: 5,
-      deadline: "2026-07-15",
-      status: "Planning",
-    },
-    {
-      id: 3,
-      name: "ERP System",
-      manager: "Michael",
-      teamSize: 12,
-      deadline: "2026-10-20",
-      status: "Completed",
-    },
-  ]);
+
+  const [projects, setProjects] = useState([]);
 
   const [open, setOpen] = useState(false);
 
-  const [project, setProject] = useState({
-    id: "",
-    name: "",
-    manager: "",
-    teamSize: "",
-    deadline: "",
-    status: "Planning",
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
   });
 
-  const handleOpen = () => setOpen(true);
+  const [project, setProject] = useState({
+    id: "",
+    projectId: "",
+    projectName: "",
+    clientName: "",
+    manager: "",
+    startDate: "",
+    endDate: "",
+    budget: "",
+    status: "Ongoing",
+  });
 
-  const handleClose = () => {
-    setOpen(false);
+  useEffect(() => {
+    loadProjects();
+  }, []);
 
-    setProject({
-      id: "",
-      name: "",
-      manager: "",
-      teamSize: "",
-      deadline: "",
-      status: "Planning",
-    });
-  };
+  const loadProjects = async () => {
 
-  const handleChange = (e) => {
-    setProject({
-      ...project,
-      [e.target.name]: e.target.value,
-    });
-  };
+    try {
 
-  const handleSave = () => {
-    if (project.id === "") {
-      setProjects([
-        ...projects,
-        {
-          ...project,
-          id: projects.length + 1,
-        },
-      ]);
-    } else {
-      setProjects(
-        projects.map((p) =>
-          p.id === project.id ? project : p
-        )
-      );
+      const data = await getAllProjects();
+
+      setProjects(Array.isArray(data) ? data : []);
+
+    } catch (error) {
+
+      console.error(error);
+
+      setProjects([]);
+
+      setSnackbar({
+        open: true,
+        message: "Failed to load projects",
+        severity: "error",
+      });
+
     }
 
-    handleClose();
   };
+    const handleOpen = () => {
 
-  const handleEdit = (project) => {
-    setProject(project);
-    setOpen(true);
-  };
+      setProject({
+        id: "",
+        projectId: "",
+        projectName: "",
+        clientName: "",
+        manager: "",
+        startDate: "",
+        endDate: "",
+        budget: "",
+        status: "Ongoing",
+      });
 
-  const handleDelete = (id) => {
-    setProjects(
-      projects.filter((project) => project.id !== id)
-    );
-  };
+      setOpen(true);
+    };
 
+    const handleClose = () => {
+
+      setOpen(false);
+
+      setProject({
+        id: "",
+        projectId: "",
+        projectName: "",
+        clientName: "",
+        manager: "",
+        startDate: "",
+        endDate: "",
+        budget: "",
+        status: "Ongoing",
+      });
+
+    };
+
+    const handleChange = (e) => {
+
+      setProject({
+        ...project,
+        [e.target.name]: e.target.value,
+      });
+
+    };
+
+    const handleSave = async () => {
+
+      try {
+
+        const requestBody = {
+          projectId: project.projectId.trim(),
+          projectName: project.projectName.trim(),
+          clientName: project.clientName.trim(),
+          manager: project.manager.trim(),
+          startDate: project.startDate,
+          endDate: project.endDate,
+          budget: Number(project.budget),
+          status: project.status.trim(),
+        };
+
+        if (project.id) {
+
+          await updateProject(project.id, requestBody);
+
+          setSnackbar({
+            open: true,
+            message: "Project Updated Successfully",
+            severity: "success",
+          });
+
+        } else {
+
+          await addProject(requestBody);
+
+          setSnackbar({
+            open: true,
+            message: "Project Added Successfully",
+            severity: "success",
+          });
+
+        }
+
+        handleClose();
+
+        loadProjects();
+
+      } catch (error) {
+
+        console.error(error);
+
+        console.log(error.response);
+        console.log(error.response?.data);
+
+        setSnackbar({
+          open: true,
+          message: "Operation Failed",
+          severity: "error",
+        });
+
+      }
+
+    };
+
+    const handleEdit = (proj) => {
+
+      setProject(proj);
+
+      setOpen(true);
+
+    };
+
+    const handleDelete = async (id) => {
+
+      if (!window.confirm("Delete this project?")) return;
+
+      try {
+
+        await deleteProject(id);
+
+        loadProjects();
+
+        setSnackbar({
+          open: true,
+          message: "Project Deleted Successfully",
+          severity: "success",
+        });
+
+      } catch (error) {
+
+        console.error(error);
+
+        setSnackbar({
+          open: true,
+          message: "Delete Failed",
+          severity: "error",
+        });
+
+      }
+
+    };
   return (
     <Box sx={{ display: "flex" }}>
       <Sidebar />
@@ -131,21 +238,17 @@ function Projects() {
             alignItems="center"
             mb={3}
           >
-            <Grid item>
-              <Typography variant="h4" fontWeight="bold">
-                Projects
-              </Typography>
-            </Grid>
+            <Typography variant="h4" fontWeight="bold">
+              Projects
+            </Typography>
 
-            <Grid item>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleOpen}
-              >
-                Add Project
-              </Button>
-            </Grid>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleOpen}
+            >
+              Add Project
+            </Button>
           </Grid>
 
           <Paper sx={{ p: 2 }}>
@@ -160,68 +263,104 @@ function Projects() {
             open={open}
             onClose={handleClose}
             fullWidth
-            maxWidth="sm"
+            maxWidth="md"
           >
             <DialogTitle>
-              {project.id ? "Edit Project" : "Add Project"}
+              {project.id ? "Update Project" : "Add Project"}
             </DialogTitle>
 
             <DialogContent>
+              <Grid container spacing={2} sx={{ mt: 1 }}>
 
-              <TextField
-                margin="normal"
-                fullWidth
-                label="Project Name"
-                name="name"
-                value={project.name}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Project ID"
+                    name="projectId"
+                    value={project.projectId}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
-              <TextField
-                margin="normal"
-                fullWidth
-                label="Project Manager"
-                name="manager"
-                value={project.manager}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Project Name"
+                    name="projectName"
+                    value={project.projectName}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
-              <TextField
-                margin="normal"
-                fullWidth
-                label="Team Size"
-                name="teamSize"
-                type="number"
-                value={project.teamSize}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Client Name"
+                    name="clientName"
+                    value={project.clientName}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
-              <TextField
-                margin="normal"
-                fullWidth
-                label="Deadline"
-                name="deadline"
-                type="date"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                value={project.deadline}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Manager"
+                    name="manager"
+                    value={project.manager}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
-              <TextField
-                margin="normal"
-                fullWidth
-                label="Status"
-                name="status"
-                value={project.status}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    label="Start Date"
+                    name="startDate"
+                    InputLabelProps={{ shrink: true }}
+                    value={project.startDate}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    label="End Date"
+                    name="endDate"
+                    InputLabelProps={{ shrink: true }}
+                    value={project.endDate}
+                    onChange={handleChange}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Budget"
+                    name="budget"
+                    value={project.budget}
+                    onChange={handleChange}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Status"
+                    name="status"
+                    value={project.status}
+                    onChange={handleChange}
+                  />
+                </Grid>
+
+              </Grid>
             </DialogContent>
 
             <DialogActions>
-
               <Button
                 color="error"
                 onClick={handleClose}
@@ -235,14 +374,30 @@ function Projects() {
               >
                 Save
               </Button>
-
             </DialogActions>
           </Dialog>
+                    <Snackbar
+                      open={snackbar.open}
+                      autoHideDuration={3000}
+                      onClose={() =>
+                        setSnackbar({
+                          ...snackbar,
+                          open: false,
+                        })
+                      }
+                    >
+                      <Alert
+                        severity={snackbar.severity}
+                        variant="filled"
+                      >
+                        {snackbar.message}
+                      </Alert>
+                    </Snackbar>
 
-        </Box>
-      </Box>
-    </Box>
-  );
-}
+                  </Box>
+                </Box>
+              </Box>
+            );
+          }
 
-export default Projects;
+          export default Projects;
