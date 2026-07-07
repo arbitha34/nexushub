@@ -1,6 +1,6 @@
 import api from "./api";
 
-const LEAVE_API = "/leave";
+const LEAVE_API = "/leaves";
 
 /*
 |--------------------------------------------------------------------------

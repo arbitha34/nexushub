@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -10,6 +10,8 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -18,93 +20,207 @@ import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import LeaveTable from "../components/LeaveTable";
 
+import {
+  getAllLeaves,
+  applyLeave,
+  updateLeave,
+  deleteLeave,
+} from "../services/leaveService";
+
 function Leave() {
-  const [leaves, setLeaves] = useState([
-    {
-      id: 1,
-      employee: "John Doe",
-      leaveType: "Casual Leave",
-      fromDate: "2026-07-10",
-      toDate: "2026-07-12",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      employee: "Sarah",
-      leaveType: "Sick Leave",
-      fromDate: "2026-07-15",
-      toDate: "2026-07-16",
-      status: "Approved",
-    },
-    {
-      id: 3,
-      employee: "Michael",
-      leaveType: "Vacation",
-      fromDate: "2026-07-20",
-      toDate: "2026-07-25",
-      status: "Rejected",
-    },
-  ]);
+
+  const [leaves, setLeaves] = useState([]);
 
   const [open, setOpen] = useState(false);
 
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
   const [leave, setLeave] = useState({
     id: "",
-    employee: "",
+    leaveId: "",
+    employeeId: "",
+    employeeName: "",
+    department: "",
     leaveType: "",
     fromDate: "",
     toDate: "",
+    reason: "",
     status: "Pending",
   });
 
-  const handleChange = (e) => {
-    setLeave({
-      ...leave,
-      [e.target.name]: e.target.value,
-    });
-  };
+  useEffect(() => {
+    loadLeaves();
+  }, []);
 
-  const handleSave = () => {
-    setLeaves([
-      ...leaves,
-      {
+  const loadLeaves = async () => {
+
+    try {
+
+      const data = await getAllLeaves();
+
+      setLeaves(Array.isArray(data) ? data : []);
+
+    } catch (error) {
+
+      console.error(error);
+
+      setLeaves([]);
+
+      setSnackbar({
+        open: true,
+        message: "Failed to load leave records",
+        severity: "error",
+      });
+
+    }
+
+  };
+    const handleOpen = () => {
+
+      setLeave({
+        id: "",
+        leaveId: "",
+        employeeId: "",
+        employeeName: "",
+        department: "",
+        leaveType: "",
+        fromDate: "",
+        toDate: "",
+        reason: "",
+        status: "Pending",
+      });
+
+      setOpen(true);
+    };
+
+    const handleClose = () => {
+
+      setOpen(false);
+
+      setLeave({
+        id: "",
+        leaveId: "",
+        employeeId: "",
+        employeeName: "",
+        department: "",
+        leaveType: "",
+        fromDate: "",
+        toDate: "",
+        reason: "",
+        status: "Pending",
+      });
+
+    };
+
+    const handleChange = (e) => {
+
+      setLeave({
         ...leave,
-        id: leaves.length + 1,
-      },
-    ]);
+        [e.target.name]: e.target.value,
+      });
 
-    setLeave({
-      id: "",
-      employee: "",
-      leaveType: "",
-      fromDate: "",
-      toDate: "",
-      status: "Pending",
-    });
+    };
 
-    setOpen(false);
-  };
+    const handleSave = async () => {
 
-  const handleApprove = (selectedLeave) => {
-    setLeaves(
-      leaves.map((item) =>
-        item.id === selectedLeave.id
-          ? { ...item, status: "Approved" }
-          : item
-      )
-    );
-  };
+      try {
 
-  const handleReject = (selectedLeave) => {
-    setLeaves(
-      leaves.map((item) =>
-        item.id === selectedLeave.id
-          ? { ...item, status: "Rejected" }
-          : item
-      )
-    );
-  };
+        const requestBody = {
+          leaveId: leave.leaveId.trim(),
+          employeeId: leave.employeeId.trim(),
+          employeeName: leave.employeeName.trim(),
+          department: leave.department.trim(),
+          leaveType: leave.leaveType.trim(),
+          fromDate: leave.fromDate,
+          toDate: leave.toDate,
+          reason: leave.reason.trim(),
+          status: leave.status.trim(),
+        };
 
+        if (leave.id) {
+
+          await updateLeave(leave.id, requestBody);
+
+          setSnackbar({
+            open: true,
+            message: "Leave Updated Successfully",
+            severity: "success",
+          });
+
+        } else {
+
+          await applyLeave(requestBody);
+
+          setSnackbar({
+            open: true,
+            message: "Leave Applied Successfully",
+            severity: "success",
+          });
+
+        }
+
+        handleClose();
+
+        loadLeaves();
+
+      } catch (error) {
+
+        console.error(error);
+
+        console.log(error.response);
+        console.log(error.response?.data);
+
+        setSnackbar({
+          open: true,
+          message: "Operation Failed",
+          severity: "error",
+        });
+
+      }
+
+    };
+
+    const handleEdit = (selectedLeave) => {
+
+      setLeave(selectedLeave);
+
+      setOpen(true);
+
+    };
+
+    const handleDelete = async (id) => {
+
+      if (!window.confirm("Delete this leave request?")) return;
+
+      try {
+
+        await deleteLeave(id);
+
+        loadLeaves();
+
+        setSnackbar({
+          open: true,
+          message: "Leave Deleted Successfully",
+          severity: "success",
+        });
+
+      } catch (error) {
+
+        console.error(error);
+
+        setSnackbar({
+          open: true,
+          message: "Delete Failed",
+          severity: "error",
+        });
+
+      }
+
+    };
   return (
     <Box sx={{ display: "flex" }}>
       <Sidebar />
@@ -133,7 +249,7 @@ function Leave() {
             <Button
               variant="contained"
               startIcon={<AddIcon />}
-              onClick={() => setOpen(true)}
+              onClick={handleOpen}
             >
               Apply Leave
             </Button>
@@ -142,60 +258,122 @@ function Leave() {
           <Paper sx={{ p: 2 }}>
             <LeaveTable
               leaves={leaves}
-              onApprove={handleApprove}
-              onReject={handleReject}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
           </Paper>
 
           <Dialog
             open={open}
-            onClose={() => setOpen(false)}
+            onClose={handleClose}
             fullWidth
-            maxWidth="sm"
+            maxWidth="md"
           >
-            <DialogTitle>Apply Leave</DialogTitle>
+            <DialogTitle>
+              {leave.id ? "Update Leave" : "Apply Leave"}
+            </DialogTitle>
 
             <DialogContent>
 
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Employee Name"
-                name="employee"
-                value={leave.employee}
-                onChange={handleChange}
-              />
+              <Grid container spacing={2} sx={{ mt: 1 }}>
 
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Leave Type"
-                name="leaveType"
-                value={leave.leaveType}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Leave ID"
+                    name="leaveId"
+                    value={leave.leaveId}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
-              <TextField
-                fullWidth
-                margin="normal"
-                type="date"
-                label="From Date"
-                name="fromDate"
-                InputLabelProps={{ shrink: true }}
-                value={leave.fromDate}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Employee ID"
+                    name="employeeId"
+                    value={leave.employeeId}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
-              <TextField
-                fullWidth
-                margin="normal"
-                type="date"
-                label="To Date"
-                name="toDate"
-                InputLabelProps={{ shrink: true }}
-                value={leave.toDate}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Employee Name"
+                    name="employeeName"
+                    value={leave.employeeName}
+                    onChange={handleChange}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Department"
+                    name="department"
+                    value={leave.department}
+                    onChange={handleChange}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Leave Type"
+                    name="leaveType"
+                    value={leave.leaveType}
+                    onChange={handleChange}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    label="From Date"
+                    name="fromDate"
+                    InputLabelProps={{ shrink: true }}
+                    value={leave.fromDate}
+                    onChange={handleChange}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    label="To Date"
+                    name="toDate"
+                    InputLabelProps={{ shrink: true }}
+                    value={leave.toDate}
+                    onChange={handleChange}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={3}
+                    label="Reason"
+                    name="reason"
+                    value={leave.reason}
+                    onChange={handleChange}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Status"
+                    name="status"
+                    value={leave.status}
+                    onChange={handleChange}
+                  />
+                </Grid>
+
+              </Grid>
 
             </DialogContent>
 
@@ -203,7 +381,7 @@ function Leave() {
 
               <Button
                 color="error"
-                onClick={() => setOpen(false)}
+                onClick={handleClose}
               >
                 Cancel
               </Button>
@@ -212,16 +390,34 @@ function Leave() {
                 variant="contained"
                 onClick={handleSave}
               >
-                Submit
+                Save
               </Button>
 
             </DialogActions>
 
           </Dialog>
-        </Box>
-      </Box>
-    </Box>
-  );
-}
+                    <Snackbar
+                      open={snackbar.open}
+                      autoHideDuration={3000}
+                      onClose={() =>
+                        setSnackbar({
+                          ...snackbar,
+                          open: false,
+                        })
+                      }
+                    >
+                      <Alert
+                        severity={snackbar.severity}
+                        variant="filled"
+                      >
+                        {snackbar.message}
+                      </Alert>
+                    </Snackbar>
 
-export default Leave;
+                  </Box>
+                </Box>
+              </Box>
+            );
+          }
+
+          export default Leave;
