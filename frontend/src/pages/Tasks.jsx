@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -10,6 +10,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -18,100 +20,204 @@ import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import TaskTable from "../components/TaskTable";
 
+import {
+  getAllTasks,
+  addTask,
+  updateTask,
+  deleteTask,
+} from "../services/taskService";
+
 function Tasks() {
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      title: "Develop Login Module",
-      employee: "John Doe",
-      project: "NexusHub",
-      dueDate: "2026-07-20",
-      priority: "High",
-      status: "In Progress",
-    },
-    {
-      id: 2,
-      title: "Create Employee API",
-      employee: "Sarah",
-      project: "NexusHub",
-      dueDate: "2026-07-25",
-      priority: "Medium",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      title: "UI Testing",
-      employee: "Michael",
-      project: "ERP System",
-      dueDate: "2026-07-28",
-      priority: "Low",
-      status: "Completed",
-    },
-  ]);
+
+  const [tasks, setTasks] = useState([]);
 
   const [open, setOpen] = useState(false);
 
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
   const [task, setTask] = useState({
     id: "",
+    taskId: "",
     title: "",
-    employee: "",
-    project: "",
-    dueDate: "",
+    description: "",
+    assignedEmployee: "",
+    projectName: "",
     priority: "Medium",
+    dueDate: "",
     status: "Pending",
   });
 
-  const handleOpen = () => setOpen(true);
+  useEffect(() => {
+    loadTasks();
+  }, []);
 
-  const handleClose = () => {
-    setOpen(false);
+  const loadTasks = async () => {
 
-    setTask({
-      id: "",
-      title: "",
-      employee: "",
-      project: "",
-      dueDate: "",
-      priority: "Medium",
-      status: "Pending",
-    });
-  };
+    try {
 
-  const handleChange = (e) => {
-    setTask({
-      ...task,
-      [e.target.name]: e.target.value,
-    });
-  };
+      const data = await getAllTasks();
 
-  const handleSave = () => {
-    if (task.id === "") {
-      setTasks([
-        ...tasks,
-        {
-          ...task,
-          id: tasks.length + 1,
-        },
-      ]);
-    } else {
-      setTasks(
-        tasks.map((t) => (t.id === task.id ? task : t))
-      );
+      setTasks(Array.isArray(data) ? data : []);
+
+    } catch (error) {
+
+      console.error(error);
+
+      setTasks([]);
+
+      setSnackbar({
+        open: true,
+        message: "Failed to load tasks",
+        severity: "error",
+      });
+
     }
 
-    handleClose();
   };
+  const handleOpen = () => {
 
-  const handleEdit = (selectedTask) => {
-    setTask(selectedTask);
-    setOpen(true);
-  };
+      setTask({
+        id: "",
+        taskId: "",
+        title: "",
+        description: "",
+        assignedEmployee: "",
+        projectName: "",
+        priority: "Medium",
+        dueDate: "",
+        status: "Pending",
+      });
 
-  const handleDelete = (id) => {
-    setTasks(tasks.filter((t) => t.id !== id));
-  };
+      setOpen(true);
+    };
 
-  return (
+    const handleClose = () => {
+
+      setOpen(false);
+
+      setTask({
+        id: "",
+        taskId: "",
+        title: "",
+        description: "",
+        assignedEmployee: "",
+        projectName: "",
+        priority: "Medium",
+        dueDate: "",
+        status: "Pending",
+      });
+
+    };
+
+    const handleChange = (e) => {
+
+      setTask({
+        ...task,
+        [e.target.name]: e.target.value,
+      });
+
+    };
+
+    const handleSave = async () => {
+
+      try {
+
+        const requestBody = {
+          taskId: task.taskId.trim(),
+          title: task.title.trim(),
+          description: task.description.trim(),
+          assignedEmployee: task.assignedEmployee.trim(),
+          projectName: task.projectName.trim(),
+          priority: task.priority.trim(),
+          dueDate: task.dueDate,
+          status: task.status.trim(),
+        };
+
+        if (task.id) {
+
+          await updateTask(task.id, requestBody);
+
+          setSnackbar({
+            open: true,
+            message: "Task Updated Successfully",
+            severity: "success",
+          });
+
+        } else {
+
+          await addTask(requestBody);
+
+          setSnackbar({
+            open: true,
+            message: "Task Added Successfully",
+            severity: "success",
+          });
+
+        }
+
+        handleClose();
+
+        loadTasks();
+
+      } catch (error) {
+
+        console.error(error);
+
+        console.log(error.response);
+        console.log(error.response?.data);
+
+        setSnackbar({
+          open: true,
+          message: "Operation Failed",
+          severity: "error",
+        });
+
+      }
+
+    };
+
+    const handleEdit = (selectedTask) => {
+
+      setTask(selectedTask);
+
+      setOpen(true);
+
+    };
+
+    const handleDelete = async (id) => {
+
+      if (!window.confirm("Delete this task?")) return;
+
+      try {
+
+        await deleteTask(id);
+
+        loadTasks();
+
+        setSnackbar({
+          open: true,
+          message: "Task Deleted Successfully",
+          severity: "success",
+        });
+
+      } catch (error) {
+
+        console.error(error);
+
+        setSnackbar({
+          open: true,
+          message: "Delete Failed",
+          severity: "error",
+        });
+
+      }
+
+    };
+return (
     <Box sx={{ display: "flex" }}>
       <Sidebar />
 
@@ -132,21 +238,17 @@ function Tasks() {
             alignItems="center"
             mb={3}
           >
-            <Grid item>
-              <Typography variant="h4" fontWeight="bold">
-                Tasks
-              </Typography>
-            </Grid>
+            <Typography variant="h4" fontWeight="bold">
+              Tasks
+            </Typography>
 
-            <Grid item>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleOpen}
-              >
-                Add Task
-              </Button>
-            </Grid>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleOpen}
+            >
+              Add Task
+            </Button>
           </Grid>
 
           <Paper sx={{ p: 2 }}>
@@ -161,70 +263,100 @@ function Tasks() {
             open={open}
             onClose={handleClose}
             fullWidth
-            maxWidth="sm"
+            maxWidth="md"
           >
             <DialogTitle>
-              {task.id ? "Edit Task" : "Add Task"}
+              {task.id ? "Update Task" : "Add Task"}
             </DialogTitle>
 
             <DialogContent>
+              <Grid container spacing={2} sx={{ mt: 1 }}>
 
-              <TextField
-                margin="normal"
-                fullWidth
-                label="Task Title"
-                name="title"
-                value={task.title}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Task ID"
+                    name="taskId"
+                    value={task.taskId}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
-              <TextField
-                margin="normal"
-                fullWidth
-                label="Assigned Employee"
-                name="employee"
-                value={task.employee}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Task Title"
+                    name="title"
+                    value={task.title}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
-              <TextField
-                margin="normal"
-                fullWidth
-                label="Project"
-                name="project"
-                value={task.project}
-                onChange={handleChange}
-              />
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={3}
+                    label="Description"
+                    name="description"
+                    value={task.description}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
-              <TextField
-                margin="normal"
-                fullWidth
-                type="date"
-                name="dueDate"
-                label="Due Date"
-                InputLabelProps={{ shrink: true }}
-                value={task.dueDate}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Assigned Employee"
+                    name="assignedEmployee"
+                    value={task.assignedEmployee}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
-              <TextField
-                margin="normal"
-                fullWidth
-                label="Priority"
-                name="priority"
-                value={task.priority}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Project Name"
+                    name="projectName"
+                    value={task.projectName}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
-              <TextField
-                margin="normal"
-                fullWidth
-                label="Status"
-                name="status"
-                value={task.status}
-                onChange={handleChange}
-              />
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Priority"
+                    name="priority"
+                    value={task.priority}
+                    onChange={handleChange}
+                  />
+                </Grid>
 
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    type="date"
+                    label="Due Date"
+                    name="dueDate"
+                    InputLabelProps={{ shrink: true }}
+                    value={task.dueDate}
+                    onChange={handleChange}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Status"
+                    name="status"
+                    value={task.status}
+                    onChange={handleChange}
+                  />
+                </Grid>
+
+              </Grid>
             </DialogContent>
 
             <DialogActions>
@@ -244,11 +376,30 @@ function Tasks() {
               </Button>
 
             </DialogActions>
-          </Dialog>
-        </Box>
-      </Box>
-    </Box>
-  );
-}
 
-export default Tasks;
+          </Dialog>
+          <Snackbar
+                      open={snackbar.open}
+                      autoHideDuration={3000}
+                      onClose={() =>
+                        setSnackbar({
+                          ...snackbar,
+                          open: false,
+                        })
+                      }
+                    >
+                      <Alert
+                        severity={snackbar.severity}
+                        variant="filled"
+                      >
+                        {snackbar.message}
+                      </Alert>
+                    </Snackbar>
+
+                  </Box>
+                </Box>
+              </Box>
+            );
+          }
+
+          export default Tasks;

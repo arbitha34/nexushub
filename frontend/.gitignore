@@ -7,31 +7,17 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Node
 node_modules
 dist
 dist-ssr
 *.local
 
-# VS Code
+# Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-
-# IntelliJ IDEA
-.idea/
-
-# OS Files
 .DS_Store
-
-# Visual Studio
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-
-# Maven
-target/
-
-# Zip Files
-*.zip
