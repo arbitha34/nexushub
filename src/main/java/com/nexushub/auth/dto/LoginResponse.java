@@ -3,6 +3,7 @@ package com.nexushub.auth.dto;
 public class LoginResponse {
 
     private String message;
+    private String token;
     private Long userId;
     private String fullName;
     private String email;
@@ -11,8 +12,15 @@ public class LoginResponse {
     public LoginResponse() {
     }
 
-    public LoginResponse(String message, Long userId, String fullName, String email, String role) {
+    public LoginResponse(String message,
+                         String token,
+                         Long userId,
+                         String fullName,
+                         String email,
+                         String role) {
+
         this.message = message;
+        this.token = token;
         this.userId = userId;
         this.fullName = fullName;
         this.email = email;
@@ -25,6 +33,14 @@ public class LoginResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public Long getUserId() {

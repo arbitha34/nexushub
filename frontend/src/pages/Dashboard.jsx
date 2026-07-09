@@ -1,23 +1,21 @@
 import { useEffect, useState } from "react";
+
 import {
   Box,
   Typography,
   Grid,
   Paper,
-  List,
-  ListItem,
-  ListItemText,
 } from "@mui/material";
-
-import PeopleIcon from "@mui/icons-material/People";
-import WorkIcon from "@mui/icons-material/Work";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import EventNoteIcon from "@mui/icons-material/EventNote";
 
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
-import DashboardCard from "../components/DashboardCard";
+
+import DashboardCards from "../components/dashboard/DashboardCards";
+import DashboardBarChart from "../components/dashboard/DashboardBarChart";
+import DashboardPieChart from "../components/dashboard/DashboardPieChart";
+import RecentActivity from "../components/dashboard/RecentActivity";
+import LatestEmployees from "../components/dashboard/LatestEmployees";
+import QuickStats from "../components/dashboard/QuickStats";
 
 import { getDashboardStats } from "../services/dashboardService";
 
@@ -32,135 +30,199 @@ function Dashboard() {
   });
 
   useEffect(() => {
-    loadDashboardStats();
+    loadDashboard();
   }, []);
 
-  const loadDashboardStats = async () => {
-
+  const loadDashboard = async () => {
     try {
-
-      const data = await getDashboardStats();
-
-      setStats(data);
-
+      const response = await getDashboardStats();
+      setStats(response);
     } catch (error) {
-
       console.error(error);
-
     }
-
   };
 
-  const activities = [
-    "Employee record updated",
-    "Project created",
-    "Task assigned",
-    "Attendance marked",
-    "Leave request submitted",
-  ];
-    return (
-      <Box sx={{ display: "flex" }}>
-        <Sidebar />
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        backgroundColor: "#F4F7FC",
+      }}
+    >
 
-        <Box sx={{ flexGrow: 1 }}>
-          <Topbar />
+      <Sidebar />
 
-          <Box
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          width: "100%",
+        }}
+      >
+
+        <Topbar />
+
+        <Box
+          sx={{
+            mt: "90px",
+            px: 4,
+            pb: 4,
+          }}
+        >
+
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+          >
+            Dashboard
+          </Typography>
+
+          <Typography
+            color="text.secondary"
+            mb={4}
+          >
+            Welcome back, Admin 👋
+          </Typography>
+
+          <DashboardCards
+            stats={stats}
+          />
+
+          <Grid
+            container
+            spacing={3}
             sx={{
-              mt: 8,
-              p: 4,
-              backgroundColor: "#f5f5f5",
-              minHeight: "100vh",
+              mt: 1,
             }}
           >
-            <Typography variant="h4" fontWeight="bold">
-              Dashboard
-            </Typography>
 
-            <Typography
-              color="text.secondary"
-              mb={4}
+            <Grid
+              item
+              xs={12}
+              lg={8}
             >
-              Welcome to NexusHub Employee & Project Management System
-            </Typography>
 
-            <Grid container spacing={3}>
+              <Paper
+                elevation={2}
+                sx={{
+                  borderRadius: 4,
+                  p: 3,
+                  height: 430,
+                }}
+              >
 
-              <Grid item xs={12} sm={6} md={3}>
-                <DashboardCard
-                  title="Employees"
-                  value={stats.totalEmployees}
-                  color="#1976d2"
-                  icon={<PeopleIcon />}
+                <DashboardBarChart
+                  employees={stats.totalEmployees}
+                  projects={stats.totalProjects}
+                  tasks={stats.totalTasks}
                 />
-              </Grid>
 
-              <Grid item xs={12} sm={6} md={3}>
-                <DashboardCard
-                  title="Projects"
-                  value={stats.totalProjects}
-                  color="#2e7d32"
-                  icon={<WorkIcon />}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6} md={3}>
-                <DashboardCard
-                  title="Tasks"
-                  value={stats.totalTasks}
-                  color="#ed6c02"
-                  icon={<AssignmentIcon />}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6} md={3}>
-                <DashboardCard
-                  title="Attendance"
-                  value={stats.totalAttendance}
-                  color="#9c27b0"
-                  icon={<EventAvailableIcon />}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6} md={3}>
-                <DashboardCard
-                  title="Leaves"
-                  value={stats.totalLeaves}
-                  color="#d32f2f"
-                  icon={<EventNoteIcon />}
-                />
-              </Grid>
+              </Paper>
 
             </Grid>
 
-            <Paper sx={{ mt: 4, p: 3 }}>
+            <Grid
+              item
+              xs={12}
+              lg={4}
+            >
 
-              <Typography
-                variant="h6"
-                fontWeight="bold"
-                mb={2}
+              <Paper
+                elevation={2}
+                sx={{
+                  borderRadius: 4,
+                  p: 3,
+                  height: 430,
+                }}
               >
-                Recent Activities
-              </Typography>
 
-              <List>
+                <DashboardPieChart
+                  attendance={stats.totalAttendance}
+                  leaves={stats.totalLeaves}
+                />
 
-                {activities.map((activity, index) => (
+              </Paper>
 
-                  <ListItem key={index}>
-                    <ListItemText primary={activity} />
-                  </ListItem>
+            </Grid>
 
-                ))}
+          </Grid>
+          <Grid
+            container
+            spacing={3}
+            sx={{
+              mt: 2,
+            }}
+          >
 
-              </List>
+            <Grid
+              item
+              xs={12}
+              lg={7}
+            >
 
-            </Paper>
+              <Paper
+                elevation={2}
+                sx={{
+                  borderRadius: 4,
+                  p: 3,
+                  height: "100%",
+                }}
+              >
+
+                <RecentActivity />
+
+              </Paper>
+
+            </Grid>
+
+            <Grid
+              item
+              xs={12}
+              lg={5}
+            >
+
+              <Paper
+                elevation={2}
+                sx={{
+                  borderRadius: 4,
+                  p: 3,
+                  height: "100%",
+                }}
+              >
+
+                <LatestEmployees />
+
+              </Paper>
+
+            </Grid>
+
+          </Grid>
+
+          <Box
+            sx={{
+              mt: 4,
+            }}
+          >
+
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              mb={3}
+            >
+              Quick Statistics
+            </Typography>
+
+            <QuickStats
+              stats={stats}
+            />
 
           </Box>
         </Box>
-      </Box>
-    );
-  }
 
-  export default Dashboard;
+      </Box>
+
+    </Box>
+  );
+}
+
+export default Dashboard;

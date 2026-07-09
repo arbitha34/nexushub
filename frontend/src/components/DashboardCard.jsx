@@ -1,60 +1,85 @@
-import { Card, CardContent, Typography, Box } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+} from "@mui/material";
 
 function DashboardCard({
   title,
   value,
   icon,
-  color = "#1976d2",
+  color,
 }) {
   return (
     <Card
-      elevation={4}
+      elevation={0}
       sx={{
-        borderRadius: 3,
-        transition: "0.3s",
+        width: "100%",
+        minHeight: 170,
+        borderRadius: 5,
+        background: `linear-gradient(135deg, ${color}, ${color}DD)`,
+        color: "#fff",
+        transition: "0.35s",
+
         "&:hover": {
-          transform: "translateY(-5px)",
+          transform: "translateY(-8px)",
+          boxShadow: "0px 18px 35px rgba(0,0,0,0.18)",
         },
       }}
     >
-      <CardContent>
-
+      <CardContent
+        sx={{
+          p: 3,
+          height: "100%",
+        }}
+      >
         <Box
           display="flex"
           justifyContent="space-between"
-          alignItems="center"
+          alignItems="flex-start"
         >
-
           <Box>
 
             <Typography
-              variant="subtitle1"
-              color="text.secondary"
+              sx={{
+                fontSize: 16,
+                opacity: .9,
+              }}
             >
               {title}
             </Typography>
 
             <Typography
-              variant="h4"
+              variant="h3"
               fontWeight="bold"
-              mt={1}
+              mt={2}
             >
               {value}
+            </Typography>
+
+            <Typography
+              sx={{
+                mt: 2,
+                opacity: .8,
+                fontSize: 13,
+              }}
+            >
+              Updated just now
             </Typography>
 
           </Box>
 
           <Box
             sx={{
-              width: 60,
-              height: 60,
-              borderRadius: "50%",
-              backgroundColor: color,
+              width: 70,
+              height: 70,
+              borderRadius: "20px",
+              background: "rgba(255,255,255,.18)",
+
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              color: "white",
-              fontSize: 30,
             }}
           >
             {icon}

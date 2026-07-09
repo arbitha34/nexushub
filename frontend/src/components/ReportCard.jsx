@@ -2,60 +2,60 @@ import {
   Card,
   CardContent,
   Typography,
+  Button,
   Box,
 } from "@mui/material";
 
+import DownloadIcon from "@mui/icons-material/Download";
+
 function ReportCard({
   title,
-  value,
-  subtitle,
+  description,
   icon,
-  color = "#1976d2",
+  color,
+  onDownload,
 }) {
   return (
     <Card
       elevation={4}
       sx={{
-        borderRadius: 3,
+        borderRadius: 4,
         transition: "0.3s",
+        height: "100%",
+
         "&:hover": {
-          transform: "translateY(-5px)",
-          boxShadow: 8,
+          transform: "translateY(-6px)",
+          boxShadow: 10,
         },
       }}
     >
-      <CardContent>
-
+      <CardContent
+        sx={{
+          p: 4,
+        }}
+      >
         <Box
           display="flex"
           justifyContent="space-between"
           alignItems="center"
         >
-
           <Box>
 
             <Typography
-              variant="h6"
+              variant="h5"
               fontWeight="bold"
             >
               {title}
             </Typography>
 
             <Typography
-              variant="h3"
-              color={color}
-              fontWeight="bold"
-              mt={1}
-            >
-              {value}
-            </Typography>
-
-            <Typography
-              variant="body2"
               color="text.secondary"
-              mt={1}
+              sx={{
+                mt: 1,
+                mb: 3,
+              }}
             >
-              {subtitle}
+              {description}
             </Typography>
 
           </Box>
@@ -65,18 +65,36 @@ function ReportCard({
               width: 70,
               height: 70,
               borderRadius: "50%",
-              backgroundColor: color,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              bgcolor: color,
               color: "white",
-              fontSize: 35,
+
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
             {icon}
           </Box>
-
         </Box>
+
+        <Button
+          fullWidth
+          variant="contained"
+          startIcon={<DownloadIcon />}
+          onClick={onDownload}
+          sx={{
+            mt: 2,
+            py: 1.5,
+            bgcolor: color,
+
+            "&:hover": {
+              bgcolor: color,
+              opacity: 0.9,
+            },
+          }}
+        >
+          Download
+        </Button>
 
       </CardContent>
     </Card>

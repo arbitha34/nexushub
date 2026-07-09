@@ -13,17 +13,21 @@ import {
 
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
+import { login as loginService } from "../services/authService";
+
 function Login() {
+
   const navigate = useNavigate();
 
   const [login, setLogin] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
+
     setLogin({
       ...login,
       [e.target.name]: e.target.value,
@@ -32,21 +36,30 @@ function Login() {
     setError("");
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
+
     e.preventDefault();
 
-    // Temporary Login
-    if (
-      login.username === "admin" &&
-      login.password === "admin123"
-    ) {
+    try {
+
+      const response = await loginService(login);
+
+      localStorage.setItem("token", response.token);
+
+      localStorage.setItem("user", JSON.stringify(response));
+
       navigate("/dashboard");
-    } else {
-      setError("Invalid Username or Password");
+
+    } catch (err) {
+
+      setError("Invalid Email or Password");
+
     }
+
   };
 
   return (
+
     <Box
       sx={{
         height: "100vh",
@@ -57,6 +70,7 @@ function Login() {
           "linear-gradient(135deg,#1976d2,#42a5f5)",
       }}
     >
+
       <Paper
         elevation={10}
         sx={{
@@ -65,11 +79,13 @@ function Login() {
           borderRadius: 4,
         }}
       >
+
         <Box
           display="flex"
           flexDirection="column"
           alignItems="center"
         >
+
           <Avatar
             sx={{
               bgcolor: "primary.main",
@@ -78,13 +94,14 @@ function Login() {
               mb: 2,
             }}
           >
+
             <LockOutlinedIcon fontSize="large" />
+
           </Avatar>
 
           <Typography
             variant="h4"
             fontWeight="bold"
-            gutterBottom
           >
             NexusHub
           </Typography>
@@ -95,21 +112,28 @@ function Login() {
           >
             Employee & Project Management System
           </Typography>
+
         </Box>
 
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+          >
             {error}
           </Alert>
+
         )}
 
         <form onSubmit={handleLogin}>
+
           <TextField
             fullWidth
             margin="normal"
-            label="Username"
-            name="username"
-            value={login.username}
+            label="Email"
+            name="email"
+            value={login.email}
             onChange={handleChange}
           />
 
@@ -135,32 +159,15 @@ function Login() {
           >
             Login
           </Button>
+
         </form>
 
-        <Typography
-          align="center"
-          color="text.secondary"
-          sx={{ mt: 3 }}
-        >
-          Demo Credentials
-        </Typography>
-
-        <Typography
-          align="center"
-          fontWeight="bold"
-        >
-          Username : admin
-        </Typography>
-
-        <Typography
-          align="center"
-          fontWeight="bold"
-        >
-          Password : admin123
-        </Typography>
       </Paper>
+
     </Box>
+
   );
+
 }
 
 export default Login;

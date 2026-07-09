@@ -9,17 +9,77 @@ import Attendance from "../pages/Attendance";
 import Leave from "../pages/Leave";
 import Reports from "../pages/Reports";
 
+import ProtectedRoute from "./ProtectedRoute";
+
 function AppRoutes() {
   return (
     <Routes>
+
       <Route path="/" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/employees" element={<Employees />} />
-      <Route path="/projects" element={<Projects />} />
-      <Route path="/tasks" element={<Tasks />} />
-      <Route path="/attendance" element={<Attendance />} />
-      <Route path="/leave" element={<Leave />} />
-      <Route path="/reports" element={<Reports />} />
+
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/employees"
+        element={
+          <ProtectedRoute>
+            <Employees />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/projects"
+        element={
+          <ProtectedRoute>
+            <Projects />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/tasks"
+        element={
+          <ProtectedRoute>
+            <Tasks />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/attendance"
+        element={
+          <ProtectedRoute>
+            <Attendance />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/leave"
+        element={
+          <ProtectedRoute>
+            <Leave />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute>
+            <Reports />
+          </ProtectedRoute>
+        }
+      />
+
     </Routes>
   );
 }

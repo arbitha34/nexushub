@@ -4,109 +4,7 @@ const REPORT_API = "/reports";
 
 /*
 |--------------------------------------------------------------------------
-| Dashboard Summary
-|--------------------------------------------------------------------------
-*/
-export const getDashboardSummary = async () => {
-  try {
-    const response = await api.get(
-      `${REPORT_API}/dashboard`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching dashboard summary:", error);
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| Employee Report
-|--------------------------------------------------------------------------
-*/
-export const getEmployeeReport = async () => {
-  try {
-    const response = await api.get(
-      `${REPORT_API}/employees`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching employee report:", error);
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| Project Report
-|--------------------------------------------------------------------------
-*/
-export const getProjectReport = async () => {
-  try {
-    const response = await api.get(
-      `${REPORT_API}/projects`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching project report:", error);
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| Task Report
-|--------------------------------------------------------------------------
-*/
-export const getTaskReport = async () => {
-  try {
-    const response = await api.get(
-      `${REPORT_API}/tasks`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching task report:", error);
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| Attendance Report
-|--------------------------------------------------------------------------
-*/
-export const getAttendanceReport = async () => {
-  try {
-    const response = await api.get(
-      `${REPORT_API}/attendance`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching attendance report:", error);
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| Leave Report
-|--------------------------------------------------------------------------
-*/
-export const getLeaveReport = async () => {
-  try {
-    const response = await api.get(
-      `${REPORT_API}/leave`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching leave report:", error);
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| Export Employee Report (PDF)
+| Employee PDF Download
 |--------------------------------------------------------------------------
 */
 export const exportEmployeePdf = async () => {
@@ -118,16 +16,31 @@ export const exportEmployeePdf = async () => {
       }
     );
 
-    return response.data;
+    const url = window.URL.createObjectURL(
+      new Blob([response.data])
+    );
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "employees.pdf";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+
   } catch (error) {
-    console.error("Error exporting employee PDF:", error);
-    throw error;
+    console.error(error);
   }
 };
 
 /*
 |--------------------------------------------------------------------------
-| Export Employee Report (Excel)
+| Employee Excel Download
 |--------------------------------------------------------------------------
 */
 export const exportEmployeeExcel = async () => {
@@ -139,51 +52,24 @@ export const exportEmployeeExcel = async () => {
       }
     );
 
-    return response.data;
-  } catch (error) {
-    console.error("Error exporting employee Excel:", error);
-    throw error;
-  }
-};
-
-/*
-|--------------------------------------------------------------------------
-| Export Project Report (PDF)
-|--------------------------------------------------------------------------
-*/
-export const exportProjectPdf = async () => {
-  try {
-    const response = await api.get(
-      `${REPORT_API}/projects/pdf`,
-      {
-        responseType: "blob",
-      }
+    const url = window.URL.createObjectURL(
+      new Blob([response.data])
     );
 
-    return response.data;
-  } catch (error) {
-    console.error("Error exporting project PDF:", error);
-    throw error;
-  }
-};
+    const link = document.createElement("a");
 
-/*
-|--------------------------------------------------------------------------
-| Export Project Report (Excel)
-|--------------------------------------------------------------------------
-*/
-export const exportProjectExcel = async () => {
-  try {
-    const response = await api.get(
-      `${REPORT_API}/projects/excel`,
-      {
-        responseType: "blob",
-      }
-    );
+    link.href = url;
+    link.download = "employees.xlsx";
 
-    return response.data;
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+
   } catch (error) {
-    console.error("Error exporting project Excel:", error);
-    throw error;
+    console.error(error);
   }
 };

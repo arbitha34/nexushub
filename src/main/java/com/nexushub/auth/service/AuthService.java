@@ -4,6 +4,7 @@ import com.nexushub.auth.dto.LoginRequest;
 import com.nexushub.auth.dto.LoginResponse;
 import com.nexushub.auth.dto.RegisterRequest;
 import com.nexushub.auth.dto.RegisterResponse;
+import com.nexushub.auth.jwt.JwtUtil;
 import com.nexushub.user.entity.Role;
 import com.nexushub.user.entity.User;
 import com.nexushub.user.repository.UserRepository;
@@ -15,11 +16,14 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     public AuthService(UserRepository userRepository,
-                       BCryptPasswordEncoder passwordEncoder) {
+                       BCryptPasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     // ==========================
@@ -55,14 +59,18 @@ public class AuthService {
     public LoginResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+                .orElseThrow(() ->
+                        new RuntimeException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
 
+        String token = jwtUtil.generateToken(user.getEmail());
+
         return new LoginResponse(
                 "Login Successful",
+                token,
                 user.getId(),
                 user.getFullName(),
                 user.getEmail(),
