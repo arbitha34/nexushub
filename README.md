@@ -192,16 +192,51 @@ admin123
 
 # 📷 Screenshots
 
-Add screenshots of:
+## 🔐 Login
 
-- Login Page
-- Dashboard
-- Employee Module
-- Project Module
-- Task Module
-- Attendance Module
-- Leave Module
-- Reports Module
+![Login](Login.png)
+
+---
+
+## 📊 Dashboard
+
+![Dashboard](Dashboard.png)
+
+---
+
+## 👨‍💼 Employees
+
+![Employees](Employees.png)
+
+---
+
+## 📁 Projects
+
+![Projects](Projects.png)
+
+---
+
+## ✅ Tasks
+
+![Tasks](Tasks.png)
+
+---
+
+## 📅 Attendance
+
+![Attendance](Attendance.png)
+
+---
+
+## 🌴 Leave
+
+![Leave](Leave.png)
+
+---
+
+## 📄 Reports
+
+![Reports](Reports.png)
 
 ---
 
