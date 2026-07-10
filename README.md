@@ -207,13 +207,18 @@ Add screenshots of:
 
 # 🚀 Future Enhancements
 
-- Search Functionality
-- Email Notifications
-- Role-Based Authorization
-- Dark Mode
+- Global Search
+- Role-Based Authorization (Admin / Manager / Employee)
 - Profile Management
-- Real-time Notifications
-- Deployment on Cloud
+- Email Notifications
+- Real-Time Notifications
+- Calendar Integration
+- AI Assistant
+- Team Collaboration
+- Docker Deployment
+- Kubernetes Support
+- Cloud Deployment
+- Analytics Dashboard
 
 ---
 
@@ -221,9 +226,23 @@ Add screenshots of:
 
 **Arbitha**
 
-BE Computer Science and Engineering
+Bachelor of Engineering (Computer Science and Engineering)
 
-GitHub:
+### Skills
+
+- Java
+- Spring Boot
+- Spring Security
+- JWT Authentication
+- React.js
+- Material UI
+- MySQL
+- REST API
+- Git
+- GitHub
+
+### GitHub
+
 https://github.com/arbitha34
 
 ---
